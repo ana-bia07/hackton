@@ -295,6 +295,82 @@ const RenderCestaBasica = ({ onBack }: { onBack: () => void }) => {
   );
 };
 
+const RenderAuxilioCreche = ({ onBack }: { onBack: () => void }) => {
+  const [pessoaSelecionada, setPessoaSelecionada] = useState<any>(null);
+
+  // Dados baseados na estrutura de 'funcionario' (id, nome, idade/filho)
+  const [listaCreche] = useState([
+    { id: 1, nome: "Mariana Costa", status: "ATIVO", filho: "Enzo", idadeFilho: 2 },
+    { id: 2, nome: "Roberto Souza", status: "PENDENTE", filho: "Julia", idadeFilho: 4 },
+  ]);
+
+  // Sub-tela de envio de arquivo
+  if (pessoaSelecionada) {
+    return (
+      <View style={styles.detalheFull}>
+        <TouchableOpacity onPress={() => setPessoaSelecionada(null)} style={styles.backBtn}>
+          <ArrowLeft size={20} color={MARROM} />
+          <Text style={styles.backText}>Voltar para Lista</Text>
+        </TouchableOpacity>
+        
+        <ScrollView contentContainerStyle={styles.detalheContent}>
+          <View style={styles.avatarGrande}><Text style={{fontSize: 40}}>👶</Text></View>
+          <Text style={styles.detalheTitle}>{pessoaSelecionada.nome}</Text>
+          <Text style={styles.detalheDesc}>Dependente: {pessoaSelecionada.filho} ({pessoaSelecionada.idadeFilho} anos)</Text>
+
+          <View style={styles.uploadArea}>
+            <ImageIcon size={32} color="#cbd5e1" />
+            <Text style={styles.uploadText}>Comprovante de Vínculo / Idade</Text>
+            <TouchableOpacity style={styles.uploadBtn}>
+              <Text style={styles.uploadBtnText}>Selecionar Arquivo</Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity 
+            style={styles.saveButton} 
+            onPress={() => {
+              Alert.alert("Sucesso", "Documento enviado para análise.");
+              setPessoaSelecionada(null);
+            }}
+          >
+            <Text style={styles.saveButtonText}>Enviar Comprovação</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.detalheFull}>
+      <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+        <ArrowLeft size={20} color={MARROM} />
+        <Text style={styles.backText}>Voltar</Text>
+      </TouchableOpacity>
+      
+      <ScrollView contentContainerStyle={styles.detalheContent}>
+        <Text style={{ fontSize: 40, textAlign: 'center' }}>🍼</Text>
+        <Text style={styles.detalheTitle}>Auxílio Creche</Text>
+        
+        {listaCreche.map((item) => (
+          <TouchableOpacity 
+            key={item.id} 
+            style={styles.crecheCard}
+            onPress={() => setPessoaSelecionada(item)}
+          >
+            <View>
+              <Text style={styles.cestaNome}>{item.nome}</Text>
+              <Text style={styles.statusLabel}>Status: {item.status}</Text>
+            </View>
+            <View style={[styles.badgeStatus, item.status === 'PENDENTE' && { backgroundColor: '#fef9c3' }]}>
+              <ChevronRight size={16} color={MARROM} />
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  );
+};
+
   return (
     <SafeAreaView style={styles.safe}>
         <View style={styles.container}>
@@ -608,4 +684,64 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: MARROM,
   },
+  //CESTA BASICA
+  crecheCard: {
+    width: '100%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#eee',
+    marginBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  avatarGrande: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: BEGE,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 15,
+  },
+  uploadArea: {
+    width: '100%',
+    height: 180,
+    backgroundColor: '#f8fafc',
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
+    borderStyle: 'dashed',
+    marginTop: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  uploadText: {
+    fontSize: 14,
+    color: '#94a3b8',
+    textAlign: 'center',
+    marginVertical: 10,
+    fontWeight: '600',
+  },
+  uploadBtn: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  uploadBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: MARROM,
+  },
+  badgeStatus: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: '#f1f5f9',
+  }
 });
