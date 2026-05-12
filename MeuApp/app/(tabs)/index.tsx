@@ -140,6 +140,11 @@ export default function App() {
     return <RenderConvenio onBack={() => setBeneficioSelecionado(null)} />;
   }
 
+  if (beneficioSelecionado?.titulo === "Cesta básica") {
+    return <RenderCestaBasica onBack={() => setBeneficioSelecionado(null)} />;
+  }
+
+
   // 3. Se tiver algo selecionado que não criamos tela específica ainda (Tela Genérica)
   if (beneficioSelecionado) {
     return (
@@ -223,6 +228,68 @@ const RenderConvenio = ({ onBack }: { onBack: () => void }) => {
              </View>
           </View>
         </View>
+      </ScrollView>
+    </View>
+  );
+};
+const RenderCestaBasica = ({ onBack }: { onBack: () => void }) => {
+  // Filtro: 'todos' ou 'pendentes' (amarelos)
+  const [filtro, setFiltro] = useState<'todos' | 'pendentes'>('todos');
+
+  // Dados simulados baseados na sua tabela 'funcionario' e 'beneficios'
+  const [listaPedidos] = useState([
+    { id: 1, nome: "João Silva", tipo: "Porta a Porta", mudanca: false },
+    { id: 2, nome: "Ana Beatriz", tipo: "Retirada", mudanca: true }, // Amarelo
+    { id: 3, nome: "Carlos Eduardo", tipo: "Retirada", mudanca: false },
+    { id: 4, nome: "Mariana Costa", tipo: "Porta a Porta", mudanca: true }, // Amarelo
+  ]);
+
+  const pedidosFiltrados = filtro === 'pendentes' 
+    ? listaPedidos.filter(p => p.mudanca) 
+    : listaPedidos;
+
+  return (
+    <View style={styles.detalheFull}>
+      <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+        <ArrowLeft size={20} color={MARROM} />
+        <Text style={styles.backText}>Voltar</Text>
+      </TouchableOpacity>
+      
+      <View style={styles.filtroContainer}>
+        <TouchableOpacity 
+          style={[styles.filtroBtn, filtro === 'todos' && styles.filtroBtnAtivo]}
+          onPress={() => setFiltro('todos')}
+        >
+          <Text style={[styles.filtroBtnText, filtro === 'todos' && styles.filtroBtnTextAtivo]}>Todos</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.filtroBtn, filtro === 'pendentes' && styles.filtroBtnAtivo]}
+          onPress={() => setFiltro('pendentes')}
+        >
+          <Text style={[styles.filtroBtnText, filtro === 'pendentes' && styles.filtroBtnTextAtivo]}>Solicitações</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.detalheContent}>
+        <Text style={{ fontSize: 40, textAlign: 'center' }}>🧺</Text>
+        <Text style={styles.detalheTitle}>Cesta Básica</Text>
+        
+        {pedidosFiltrados.map((item) => (
+          <View 
+            key={item.id} 
+            style={[styles.cestaCard, item.mudanca && styles.cestaCardAlerta]}
+          >
+            <View>
+              <Text style={styles.cestaNome}>{item.nome}</Text>
+              <Text style={styles.cestaTipo}>Modalidade: {item.tipo}</Text>
+            </View>
+            {item.mudanca && (
+              <View style={styles.tagAlerta}>
+                <Text style={styles.tagAlertaText}>PEDIDO DE MUDANÇA</Text>
+              </View>
+            )}
+          </View>
+        ))}
       </ScrollView>
     </View>
   );
@@ -473,5 +540,72 @@ const styles = StyleSheet.create({
     width: 1,
     height: '100%',
     backgroundColor: '#e2e8f0',
-  }
+  },
+
+  //CESTA BASICA
+  filtroContainer: {
+    flexDirection: 'row',
+    padding: 15,
+    justifyContent: 'center',
+    gap: 10,
+    backgroundColor: '#f8fafc',
+  },
+  filtroBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  filtroBtnAtivo: {
+    backgroundColor: MARROM,
+    borderColor: MARROM,
+  },
+  filtroBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#666',
+  },
+  filtroBtnTextAtivo: {
+    color: '#fff',
+  },
+  cestaCard: {
+    width: '100%',
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#eee',
+    marginBottom: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cestaCardAlerta: {
+    backgroundColor: '#fefce8', // Amarelo claro
+    borderColor: '#fef08a',     // Borda amarela
+    borderWidth: 2,
+  },
+  cestaNome: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#333',
+  },
+  cestaTipo: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 2,
+  },
+  tagAlerta: {
+    backgroundColor: '#facc15',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  tagAlertaText: {
+    fontSize: 8,
+    fontWeight: '900',
+    color: MARROM,
+  },
 });
