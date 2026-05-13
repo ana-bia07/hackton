@@ -35,7 +35,7 @@ const BEGE = "#fcf9f7";
 const BORDA = "#ede1d9";
 
 export default function App() {
-  const [tela, setTela] = useState<"pessoal" | "beneficios">("pessoal");
+  const [tela, setTela] = useState<"mural" | "beneficios" | "pessoal">("mural");
   
   // --- ESTADOS DE DADOS ---
   const [murais, setMurais] = useState([
@@ -56,6 +56,7 @@ export default function App() {
   const [menuAberto, setMenuAberto] = useState(false);
   const [modalTipo, setModalTipo] = useState<null | 'Mural' | 'Aviso' | 'Votação'>(null);
   const [beneficioSelecionado, setBeneficioSelecionado] = useState<any>(null);
+  const [pessoalSelecionado, setPessoalSelecionado] = useState<any>(null);
 
   // Estados dos formulários
   const [tempTitulo, setTempTitulo] = useState("");
@@ -78,7 +79,7 @@ export default function App() {
 
   // --- RENDERIZAÇÃO DE TELAS ---
 
-  const renderPessoal = () => (
+  const renderMural = () => (
     <ScrollView contentContainerStyle={styles.scrollContent}>
       <Text style={styles.pageTitle}>Olá, colaborador</Text>
       <Text style={styles.pageSubtitle}>Confira seus avisos e atualizações</Text>
@@ -147,7 +148,6 @@ export default function App() {
   if (beneficioSelecionado?.titulo === "Auxílio creche") {
     return <RenderAuxilioCreche onBack={() => setBeneficioSelecionado(null)} />;
   }
-
 
   // 3. Se tiver algo selecionado que não criamos tela específica ainda (Tela Genérica)
   if (beneficioSelecionado) {
@@ -362,6 +362,390 @@ const RenderAuxilioCreche = ({ onBack }: { onBack: () => void }) => {
     </View>
   );
 };
+const RenderPessoal = () => {
+  const listaPessoal = [
+    { id: 1, titulo: "Controle de Férias", emoji: "🏖️", descricao: "Gestão de períodos aquisitivos e gozo." },
+    { id: 2, titulo: "Holerites", emoji: "📄", descricao: "Visualização e gestão de contracheques." },
+    { id: 3, titulo: "Faltas e Atestados", emoji: "🤒", descricao: "Controle de justificativas e ausências." },
+    { id: 4, titulo: "Treinamentos", emoji: "🎓", descricao: "Gestão de cursos e capacitações." },
+  ];
+
+  // Dentro da lógica de renderização do Pessoal no index.tsx
+  if (pessoalSelecionado?.titulo === "Controle de Férias") {
+    return <RenderFerias onBack={() => setPessoalSelecionado(null)} />;
+  }
+
+  if (pessoalSelecionado?.titulo === "Faltas e Atestados") {
+    return <RenderFaltas onBack={() => setPessoalSelecionado(null)} />;
+  }
+
+  if (pessoalSelecionado?.titulo === "Treinamentos") {
+    return <RenderTreinamentos onBack={() => setPessoalSelecionado(null)} />;
+  }
+
+  if (pessoalSelecionado?.titulo === "Holerites") {
+  return <RenderHolerites onBack={() => setPessoalSelecionado(null)} />;
+}
+
+  return (
+    <ScrollView contentContainerStyle={styles.content}>
+      <Text style={styles.pageTitle}>Gestão de Pessoal</Text>
+      <Text style={styles.pageSubtitle}>Administração de dados dos colaboradores</Text>
+      
+      <View style={styles.grid}>
+        {listaPessoal.map((item) => (
+          <TouchableOpacity 
+            key={item.id} 
+            style={styles.benefitCard} // Reutilizando seu estilo de card
+            onPress={() => setPessoalSelecionado(item)}
+          >
+            <View style={styles.iconBox}>
+              <Text style={{fontSize: 22}}>{item.emoji}</Text>
+            </View>
+            <View style={{ flex: 1, marginLeft: 15 }}>
+              <Text style={styles.benefitTitle}>{item.titulo}</Text>
+            </View>
+            <ChevronRight size={14} color={MARROM} />
+          </TouchableOpacity>
+        ))}
+      </View>
+    </ScrollView>
+  );
+};
+
+const RenderFerias = ({ onBack }: { onBack: () => void }) => {
+  const [funcionarioFocado, setFuncionarioFocado] = useState<any>(null);
+  const [dataInicio, setDataInicio] = useState("");
+  const [quantidadeDias, setQuantidadeDias] = useState("");
+
+  // Dados simulados para gestão
+  const [listaFerias] = useState([
+    { id: 1, nome: "Ana Oliveira", status: "Em férias", inicio: "01/05/2026", dias: 30 },
+    { id: 2, nome: "Bruno Costa", status: "Agendado", inicio: "15/07/2026", dias: 15 },
+    { id: 3, nome: "Carla Souza", status: "Disponível", inicio: "-", dias: 0 },
+  ]);
+
+  if (funcionarioFocado) {
+    return (
+      <View style={styles.detalheFull}>
+        <TouchableOpacity onPress={() => setFuncionarioFocado(null)} style={styles.backBtn}>
+          <ArrowLeft size={20} color={MARROM} />
+          <Text style={styles.backText}>Voltar</Text>
+        </TouchableOpacity>
+
+        <ScrollView contentContainerStyle={styles.detalheContent}>
+          <Text style={styles.detalheTitle}>Editar Férias</Text>
+          <Text style={styles.nomeFocado}>{funcionarioFocado.nome}</Text>
+
+          <View style={styles.formFerias}>
+            <Text style={styles.labelInput}>Data de Início (DD/MM/AAAA)</Text>
+            <TextInput 
+              style={styles.inputAdmin}
+              placeholder="Ex: 20/12/2026"
+              value={dataInicio}
+              onChangeText={setDataInicio}
+            />
+
+            <Text style={styles.labelInput}>Quantidade de Dias (Número inteiro)</Text>
+            <TextInput 
+              style={styles.inputAdmin}
+              placeholder="Ex: 30"
+              keyboardType="numeric"
+              value={quantidadeDias}
+              onChangeText={setQuantidadeDias}
+            />
+
+            <TouchableOpacity 
+              style={styles.saveButton}
+              onPress={() => {
+                Alert.alert("Sucesso", "Período de férias atualizado!");
+                setFuncionarioFocado(null);
+              }}
+            >
+              <Text style={styles.saveButtonText}>Salvar Alterações</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.detalheFull}>
+      <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+        <ArrowLeft size={20} color={MARROM} />
+        <Text style={styles.backText}>Voltar</Text>
+      </TouchableOpacity>
+
+      <ScrollView contentContainerStyle={styles.detalheContent}>
+        <Text style={styles.detalheTitle}>Controle de Férias</Text>
+        {listaFerias.map((f) => (
+          <TouchableOpacity key={f.id} style={styles.cardPedido} onPress={() => setFuncionarioFocado(f)}>
+            <View>
+              <Text style={styles.pedidoNome}>{f.nome}</Text>
+              <Text style={styles.pedidoSub}>Status: {f.status} • {f.dias} dias</Text>
+            </View>
+            <ChevronRight size={18} color={MARROM} />
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  );
+};
+
+const RenderFaltas = ({ onBack }: { onBack: () => void }) => {
+  const [focado, setFocado] = useState<any>(null);
+
+  // Simulação de dados do banco
+  const [listaFaltas] = useState([
+    { id: 1, nome: "Juliana Rocha", tipo: "Atestado", status: "Pendente", doc: "atestado_medico.jpg", cor: "#fef9c3" }, // Amarelo
+    { id: 2, nome: "Marcos Paulo", tipo: "Falta", status: "Injustificada", doc: null, cor: "#fee2e2" }, // Vermelho
+    { id: 3, nome: "Larissa Manoela", tipo: "Atestado", status: "Pendente", doc: "atestado_odonto.pdf", cor: "#fef9c3" },
+  ]);
+
+  if (focado) {
+    return (
+      <View style={styles.detalheFull}>
+        <TouchableOpacity onPress={() => setFocado(null)} style={styles.backBtn}>
+          <ArrowLeft size={20} color={MARROM} />
+          <Text style={styles.backText}>Voltar</Text>
+        </TouchableOpacity>
+
+        <ScrollView contentContainerStyle={styles.detalheContent}>
+          <Text style={styles.detalheTitle}>Validar Ausência</Text>
+          <Text style={styles.nomeFocado}>{focado.nome}</Text>
+
+          {focado.doc ? (
+            <View style={styles.arquivoCard}>
+              <ImageIcon size={32} color={MARROM} />
+              <Text style={styles.nomeArquivo}>{focado.doc}</Text>
+              <TouchableOpacity style={styles.btnDownload} onPress={() => alert("Visualizando...")}>
+                <Text style={styles.btnDownloadText}>Abrir Atestado</Text>
+              </TouchableOpacity>
+              
+              <View style={styles.rowAcoes}>
+                <TouchableOpacity style={[styles.btnDecisao, { backgroundColor: '#991b1b' }]}>
+                  <Text style={styles.btnDecisaoText}>Inválido</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.btnDecisao, { backgroundColor: '#166534' }]}>
+                  <Text style={styles.btnDecisaoText}>Validar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+            <View style={[styles.arquivoCard, { borderColor: '#ef4444', borderStyle: 'solid' }]}>
+              <Text style={{ color: '#b91c1c', fontWeight: '800' }}>FALTA SEM JUSTIFICATIVA</Text>
+              <Text style={{ textAlign: 'center', marginTop: 10, color: '#666' }}>
+                O colaborador ainda não enviou nenhum documento comprobatório.
+              </Text>
+            </View>
+          )}
+        </ScrollView>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.detalheFull}>
+      <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+        <ArrowLeft size={20} color={MARROM} />
+        <Text style={styles.backText}>Voltar</Text>
+      </TouchableOpacity>
+
+      <ScrollView contentContainerStyle={styles.detalheContent}>
+        <Text style={styles.detalheTitle}>Faltas e Atestados</Text>
+        <Text style={styles.pageSubtitle}>Verificação de ausências recentes</Text>
+
+        {listaFaltas.map((item) => (
+          <TouchableOpacity 
+            key={item.id} 
+            style={[styles.cardPedido, { backgroundColor: item.cor, borderColor: 'rgba(0,0,0,0.05)' }]} 
+            onPress={() => setFocado(item)}
+          >
+            <View>
+              <Text style={styles.pedidoNome}>{item.nome}</Text>
+              <Text style={styles.pedidoSub}>{item.tipo} - {item.status}</Text>
+            </View>
+            <View style={styles.badgeAcao}>
+               <Text style={styles.badgeAcaoText}>{item.doc ? "ANALISAR" : "COBRAR"}</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  );
+};
+
+const RenderTreinamentos = ({ onBack }: { onBack: () => void }) => {
+  const [focado, setFocado] = useState<any>(null);
+  const [listaVideos, setListaVideos] = useState([
+    { id: 1, titulo: "Segurança no Trabalho", duracao: "15 min", url: "vimeo.com/link1" },
+    { id: 2, titulo: "Boas Práticas de Fabricação", duracao: "30 min", url: "vimeo.com/link2" },
+    { id: 3, titulo: "Cultura Lipson", duracao: "10 min", url: "vimeo.com/link3" },
+  ]);
+  const [novoTitulo, setNovoTitulo] = useState("");
+  const [novoLink, setNovoLink] = useState("");
+
+  if (focado) {
+    return (
+      <View style={styles.detalheFull}>
+        <TouchableOpacity onPress={() => setFocado(null)} style={styles.backBtn}>
+          <ArrowLeft size={20} color={MARROM} />
+          <Text style={styles.backText}>Voltar</Text>
+        </TouchableOpacity>
+        <ScrollView contentContainerStyle={styles.detalheContent}>
+          <Text style={styles.detalheTitle}>Editar Treinamento</Text>
+          <Text style={styles.nomeFocado}>{focado.titulo}</Text>
+          <View style={styles.arquivoCard}>
+             <Text style={{color: MARROM, fontWeight: '700'}}>Link do Vídeo:</Text>
+             <Text style={styles.nomeArquivo}>{focado.url}</Text>
+          </View>
+          <TouchableOpacity 
+            style={[styles.saveButton, {backgroundColor: '#991b1b', marginTop: 20}]}
+            onPress={() => {
+              setListaVideos(listaVideos.filter(v => v.id !== focado.id));
+              setFocado(null);
+            }}
+          >
+            <Text style={styles.saveButtonText}>Apagar Treinamento</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.detalheFull}>
+      <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+        <ArrowLeft size={20} color={MARROM} />
+        <Text style={styles.backText}>Voltar</Text>
+      </TouchableOpacity>
+
+      <ScrollView contentContainerStyle={styles.detalheContent}>
+        <Text style={styles.detalheTitle}>Gestão de Treinamentos</Text>
+        
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>Adicionar Conteúdo</Text>
+          <TextInput style={styles.inputAdmin} placeholder="Título do treinamento" value={novoTitulo} onChangeText={setNovoTitulo} />
+          <TextInput style={[styles.inputAdmin, {marginTop: 10}]} placeholder="Link do vídeo (Vimeo/YouTube)" value={novoLink} onChangeText={setNovoLink} />
+          
+          <View style={{flexDirection: 'row', gap: 10, marginTop: 15}}>
+            <TouchableOpacity 
+              style={[styles.saveButton, {flex: 1, marginTop: 0, padding: 12}]}
+              onPress={() => {
+                if(novoTitulo && novoLink){
+                  setListaVideos([...listaVideos, { id: Date.now(), titulo: novoTitulo, url: novoLink, duracao: "0 min" }]);
+                  setNovoTitulo(""); setNovoLink("");
+                }
+              }}
+            >
+              <Text style={styles.saveButtonText}>Publicar Link</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.saveButton, {flex: 1, marginTop: 0, padding: 12, backgroundColor: '#fff', borderWidth: 1, borderColor: MARROM}]}
+              onPress={() => Alert.alert("Importar", "Abrindo galeria do dispositivo...")}
+            >
+              <View style={{flexDirection: 'row', alignItems: 'center', gap: 5}}>
+                <ImageIcon size={16} color={MARROM} />
+                <Text style={[styles.saveButtonText, {color: MARROM}]}>Do Aparelho</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <Text style={[styles.sectionTitle, {marginTop: 20}]}>Vídeos Disponíveis</Text>
+        {listaVideos.map((video) => (
+          <TouchableOpacity key={video.id} style={styles.cardPedido} onPress={() => setFocado(video)}>
+            <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
+               <View style={styles.iconBox}>
+                  <Text style={{fontSize: 20}}>🎬</Text>
+               </View>
+               <View style={{marginLeft: 15, flex: 1}}>
+                  <Text style={styles.pedidoNome}>{video.titulo}</Text>
+                  <Text style={styles.pedidoSub}>{video.duracao}</Text>
+               </View>
+            </View>
+            <ChevronRight size={18} color={MARROM} />
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  );
+};
+
+const RenderHolerites = ({ onBack }: { onBack: () => void }) => {
+  const [funcFocado, setFuncFocado] = useState<any>(null);
+
+  // Lista de funcionários para o RH escolher
+  const [colaboradores] = useState([
+    { id: 1, nome: "Ana Oliveira", cargo: "Operador de Produção" },
+    { id: 2, nome: "Bruno Costa", cargo: "Analista de Qualidade" },
+  ]);
+
+  // Histórico de holerites do funcionário selecionado
+  const [historico] = useState([
+    { id: 101, mes: "Maio/2026", status: "Pendente", valor: "R$ 2.450,00" },
+    { id: 102, mes: "Abril/2026", status: "Assinado", valor: "R$ 2.450,00" },
+    { id: 103, mes: "Março/2026", status: "Assinado", valor: "R$ 2.100,00" },
+  ]);
+
+  if (funcFocado) {
+    return (
+      <View style={styles.detalheFull}>
+        <TouchableOpacity onPress={() => setFuncFocado(null)} style={styles.backBtn}>
+          <ArrowLeft size={20} color={MARROM} />
+          <Text style={styles.backText}>Voltar para Lista</Text>
+        </TouchableOpacity>
+
+        <ScrollView contentContainerStyle={styles.detalheContent}>
+          <Text style={styles.detalheTitle}>Holerites de {funcFocado.nome}</Text>
+          
+          {historico.map((h) => (
+            <View key={h.id} style={styles.cardPedido}>
+              <View>
+                <Text style={styles.pedidoNome}>{h.mes}</Text>
+                <Text style={[styles.pedidoSub, { color: h.status === 'Pendente' ? '#b91c1c' : '#166534', fontWeight: '800' }]}>
+                  {h.status}
+                </Text>
+              </View>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={{ fontWeight: '700', color: '#333' }}>{h.valor}</Text>
+                <TouchableOpacity onPress={() => alert("Abrindo PDF...")}>
+                  <Text style={{ color: MARROM, fontSize: 12, marginTop: 5, textDecorationLine: 'underline' }}>Ver PDF</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))}
+        </ScrollView>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.detalheFull}>
+      <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+        <ArrowLeft size={20} color={MARROM} />
+        <Text style={styles.backText}>Voltar</Text>
+      </TouchableOpacity>
+
+      <ScrollView contentContainerStyle={styles.detalheContent}>
+        <Text style={styles.detalheTitle}>Gestão de Holerites</Text>
+        <Text style={styles.pageSubtitle}>Selecione um colaborador para ver o histórico</Text>
+
+        {colaboradores.map((c) => (
+          <TouchableOpacity key={c.id} style={styles.cardPedido} onPress={() => setFuncFocado(c)}>
+            <View>
+              <Text style={styles.pedidoNome}>{c.nome}</Text>
+              <Text style={styles.pedidoSub}>{c.cargo}</Text>
+            </View>
+            <ChevronRight size={18} color={MARROM} />
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  );
+};
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -378,7 +762,10 @@ const RenderAuxilioCreche = ({ onBack }: { onBack: () => void }) => {
           </View>
 
           {/* CONTEÚDO DINÂMICO */}
-          {tela === "pessoal" ? renderPessoal() : renderBeneficios()}
+          {tela === "mural" ? renderMural() :
+          tela === "beneficios" ? renderBeneficios() :
+          <RenderPessoal/>}
+
 
           {/* FAB & SPINNER */}
           <View style={styles.fabContainer}>
@@ -395,15 +782,35 @@ const RenderAuxilioCreche = ({ onBack }: { onBack: () => void }) => {
           </View>
 
           {/* BOTTOM NAV */}
-          <View style={styles.nav}>
-            <TouchableOpacity style={[styles.navItem, tela === "beneficios" && styles.navItemActive]} onPress={() => {setTela("beneficios"); setBeneficioSelecionado(null)}}>
+        <View style={styles.nav}>
+          
+            {/* BOTÃO BENEFÍCIOS */}
+            <TouchableOpacity 
+              style={[styles.navItem, tela === "beneficios" && styles.navItemActive]} 
+              onPress={() => {setTela("beneficios"); setBeneficioSelecionado(null)}}
+            >
               <Heart color="white" size={24} opacity={tela === "beneficios" ? 1 : 0.5} />
               <Text style={[styles.navText, {opacity: tela === "beneficios" ? 1 : 0.5}]}>Benefícios</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.navItem, tela === "pessoal" && styles.navItemActive]} onPress={() => setTela("pessoal")}>
-              <UserCircle color="white" size={24} opacity={tela === "pessoal" ? 1 : 0.5} />
-              <Text style={[styles.navText, {opacity: tela === "pessoal" ? 1 : 0.5}]}>Pessoal</Text>
+
+            {/* BOTÃO MURAL (Antigo Pessoal) */}
+            <TouchableOpacity 
+              style={[styles.navItem, tela === "mural" && styles.navItemActive]} 
+              onPress={() => setTela("mural")}
+            >
+              {/* Usei o ícone MessageSquare para diferenciar visualmente do Perfil */}
+              <MessageSquare color="white" size={24} opacity={tela === "mural" ? 1 : 0.5} />
+              <Text style={[styles.navText, {opacity: tela === "mural" ? 1 : 0.5}]}>Mural</Text>
             </TouchableOpacity>
+
+            {/* NOVO BOTÃO: PERFIL */}
+          <TouchableOpacity 
+            style={[styles.navItem, tela === "pessoal" && styles.navItemActive]} 
+            onPress={() => setTela("pessoal")}
+          >
+            <UserCircle color="white" size={24} opacity={tela === "pessoal" ? 1 : 0.5} />
+            <Text style={[styles.navText, {opacity: tela === "pessoal" ? 1 : 0.5}]}>Pessoal</Text>
+          </TouchableOpacity>
           </View>
 
           {/* MODAL DE CRIAÇÃO */}
@@ -736,7 +1143,99 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: '#f1f5f9',
   },
-  // AUXILIO CRECHE
+  //Ferias
+  formFerias: {
+    width: '100%',
+    marginTop: 10,
+  },
+  labelInput: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#444',
+    marginBottom: 8,
+    marginTop: 15,
+  },
+  inputAdmin: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: BORDA,
+    borderRadius: 12,
+    padding: 15,
+    fontSize: 16,
+  },
+  saveButton: {
+    backgroundColor: MARROM,
+    padding: 18,
+    borderRadius: 15,
+    alignItems: 'center',
+    marginTop: 30,
+  },
+  badgeAcao: {
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+  },
+  badgeAcaoText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#444',
+  },
+  cardPedido: {
+    width: '100%',
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#eee',
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    // Sombra leve para dar profundidade igual ao benefício
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+
+  pedidoNome: { 
+    fontSize: 16, 
+    fontWeight: '800', 
+    color: '#333' 
+  },
+
+  pedidoSub: { 
+    fontSize: 13, 
+    color: '#666',
+    marginTop: 2 
+  },
+
+  iconBox: { 
+    width: 45, 
+    height: 45, 
+    backgroundColor: BEGE, 
+    borderRadius: 12, 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+
+  nomeFocado: { 
+    fontSize: 20, 
+    fontWeight: '700', 
+    marginBottom: 20, 
+    color: MARROM,
+    textAlign: 'center' 
+  },
+
+  saveButtonText: { 
+    color: 'white', 
+    fontWeight: '900',
+    fontSize: 14 
+  },
+
   cardPedido: {
     width: '100%',
     backgroundColor: '#fff',
