@@ -144,6 +144,10 @@ export default function App() {
     return <RenderCestaBasica onBack={() => setBeneficioSelecionado(null)} />;
   }
 
+  if (beneficioSelecionado?.titulo === "Auxílio creche") {
+    return <RenderAuxilioCreche onBack={() => setBeneficioSelecionado(null)} />;
+  }
+
 
   // 3. Se tiver algo selecionado que não criamos tela específica ainda (Tela Genérica)
   if (beneficioSelecionado) {
@@ -296,45 +300,42 @@ const RenderCestaBasica = ({ onBack }: { onBack: () => void }) => {
 };
 
 const RenderAuxilioCreche = ({ onBack }: { onBack: () => void }) => {
-  const [pessoaSelecionada, setPessoaSelecionada] = useState<any>(null);
+  const [focado, setFocado] = useState<any>(null);
 
-  // Dados baseados na estrutura de 'funcionario' (id, nome, idade/filho)
-  const [listaCreche] = useState([
-    { id: 1, nome: "Mariana Costa", status: "ATIVO", filho: "Enzo", idadeFilho: 2 },
-    { id: 2, nome: "Roberto Souza", status: "PENDENTE", filho: "Julia", idadeFilho: 4 },
+  // Dados vindo da lógica de banco que você montou
+  const [pedidos] = useState([
+    { id: 1, nome: "Mariana Costa", filho: "Enzo", doc: "comprovante_nascimento.pdf" },
+    { id: 2, nome: "Roberto Souza", filho: "Julia", doc: "certidao_vacina.jpg" },
   ]);
 
-  // Sub-tela de envio de arquivo
-  if (pessoaSelecionada) {
+  if (focado) {
     return (
       <View style={styles.detalheFull}>
-        <TouchableOpacity onPress={() => setPessoaSelecionada(null)} style={styles.backBtn}>
+        <TouchableOpacity onPress={() => setFocado(null)} style={styles.backBtn}>
           <ArrowLeft size={20} color={MARROM} />
-          <Text style={styles.backText}>Voltar para Lista</Text>
+          <Text style={styles.backText}>Voltar</Text>
         </TouchableOpacity>
         
         <ScrollView contentContainerStyle={styles.detalheContent}>
-          <View style={styles.avatarGrande}><Text style={{fontSize: 40}}>👶</Text></View>
-          <Text style={styles.detalheTitle}>{pessoaSelecionada.nome}</Text>
-          <Text style={styles.detalheDesc}>Dependente: {pessoaSelecionada.filho} ({pessoaSelecionada.idadeFilho} anos)</Text>
+          <Text style={styles.detalheTitle}>Analisar Pedido</Text>
+          <Text style={styles.nomeFocado}>{focado.nome}</Text>
 
-          <View style={styles.uploadArea}>
-            <ImageIcon size={32} color="#cbd5e1" />
-            <Text style={styles.uploadText}>Comprovante de Vínculo / Idade</Text>
-            <TouchableOpacity style={styles.uploadBtn}>
-              <Text style={styles.uploadBtnText}>Selecionar Arquivo</Text>
+          <View style={styles.arquivoCard}>
+            <ImageIcon size={32} color={MARROM} />
+            <Text style={styles.nomeArquivo}>{focado.doc}</Text>
+            <TouchableOpacity style={styles.btnDownload} onPress={() => alert("Baixando...")}>
+              <Text style={styles.btnDownloadText}>Baixar Arquivo</Text>
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity 
-            style={styles.saveButton} 
-            onPress={() => {
-              Alert.alert("Sucesso", "Documento enviado para análise.");
-              setPessoaSelecionada(null);
-            }}
-          >
-            <Text style={styles.saveButtonText}>Enviar Comprovação</Text>
-          </TouchableOpacity>
+          <View style={styles.rowAcoes}>
+            <TouchableOpacity style={[styles.btnDecisao, { backgroundColor: '#991b1b' }]}>
+              <Text style={styles.btnDecisaoText}>Recusar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.btnDecisao, { backgroundColor: '#166534' }]}>
+              <Text style={styles.btnDecisaoText}>Aprovar</Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </View>
     );
@@ -346,24 +347,15 @@ const RenderAuxilioCreche = ({ onBack }: { onBack: () => void }) => {
         <ArrowLeft size={20} color={MARROM} />
         <Text style={styles.backText}>Voltar</Text>
       </TouchableOpacity>
-      
       <ScrollView contentContainerStyle={styles.detalheContent}>
-        <Text style={{ fontSize: 40, textAlign: 'center' }}>🍼</Text>
-        <Text style={styles.detalheTitle}>Auxílio Creche</Text>
-        
-        {listaCreche.map((item) => (
-          <TouchableOpacity 
-            key={item.id} 
-            style={styles.crecheCard}
-            onPress={() => setPessoaSelecionada(item)}
-          >
+        <Text style={styles.detalheTitle}>Solicitações Creche</Text>
+        {pedidos.map((p) => (
+          <TouchableOpacity key={p.id} style={styles.cardPedido} onPress={() => setFocado(p)}>
             <View>
-              <Text style={styles.cestaNome}>{item.nome}</Text>
-              <Text style={styles.statusLabel}>Status: {item.status}</Text>
+              <Text style={styles.pedidoNome}>{p.nome}</Text>
+              <Text style={styles.pedidoSub}>Filho: {p.filho}</Text>
             </View>
-            <View style={[styles.badgeStatus, item.status === 'PENDENTE' && { backgroundColor: '#fef9c3' }]}>
-              <ChevronRight size={16} color={MARROM} />
-            </View>
+            <ChevronRight size={18} color={MARROM} />
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -743,5 +735,43 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 12,
     backgroundColor: '#f1f5f9',
-  }
+  },
+  // AUXILIO CRECHE
+  cardPedido: {
+    width: '100%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: BORDA,
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  pedidoNome: { fontSize: 16, fontWeight: '800', color: '#333' },
+  pedidoSub: { fontSize: 13, color: '#666' },
+  nomeFocado: { fontSize: 20, fontWeight: '700', marginBottom: 20, color: MARROM },
+  arquivoCard: {
+    width: '100%',
+    padding: 25,
+    backgroundColor: BEGE,
+    borderRadius: 20,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: MARROM
+  },
+  nomeArquivo: { marginTop: 10, fontSize: 14, fontWeight: '600' },
+  btnDownload: {
+    marginTop: 15,
+    backgroundColor: MARROM,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 8
+  },
+  btnDownloadText: { color: '#fff', fontWeight: '800', fontSize: 12 },
+  rowAcoes: { flexDirection: 'row', gap: 10, marginTop: 30 },
+  btnDecisao: { flex: 1, padding: 15, borderRadius: 12, alignItems: 'center' },
+  btnDecisaoText: { color: '#fff', fontWeight: '900' }
 });
